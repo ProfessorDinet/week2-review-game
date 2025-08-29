@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Week 2 CS Review Platformer</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --sky1: #7cc3ff;
+      --sky2: #b7e3ff;
+      --ground: #5a3e2b;
+      --grass: #61c654;
+      --brick: #b75b3c;
+      --coin: #ffd23f;
+      --player: #3a7afe;
+      --enemy: #ff4d4f;
+      --white: #ffffff;
+      --panel: #0f172aee;
+      --accent: #8b5cf6;
+      --good: #22c55e;
+      --bad: #ef4444;
+      --hud: #0b1220aa;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: radial-gradient(1200px 800px at 50% -200px, var(--sky2), var(--sky1));
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color: var(--white);
+      user-select: none;
+    }
+    #wrap {
+      display: grid;
+      place-items: center;
+      height: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    canvas {
+      background: linear-gradient(180deg, var(--sky2) 0%, var(--sky1) 60%, #7ed5ff 100%);
+      width: min(100vw - 16px, 1100px);
+      height: calc(min(100vw - 16px, 1100px) * 0.6);
+      max-height: 75vh;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px #00000040, 0 1px 0 #ffffff20 inset;
+      outline: 2px solid #ffffff10;
+    }
+    #hud {
+      position: fixed;
+      inset: 12px 12px auto 12px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: var(--hud);
+      padding: 8px 12px;
+      border-radius: 12px;
+      backdrop-filter: blur(6px);
+      font-weight: 600;
+    }
+    #hud .pill {
+      padding: 6px 10px;
+      background: #00000040;
+      border-radius: 10px;
+    }
+    #hud button, .btn {
+      all: unset;
+      background: #ffffff18;
+      padding: 6px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform .08s ease, background .2s ease;
+      border: 1px solid #ffffff22;
+    }
+    #hud button:hover, .btn:hover { transform: translateY(-1px); background: #ffffff28; }
+    #hud button:active, .btn:active { transform: translateY(0); }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: #020617cc;
+      padding: 20px;
+      z-index: 10;
+    }
+    .modal.show { display: flex; }
+    .card {
+      width: min(900px, 92vw);
+      max-height: 84vh;
+      overflow: auto;
+      background: var(--panel);
+      border: 1px solid #ffffff22;
+      box-shadow: 0 30px 80px #00000060;
+      border-radius: 16px;
+      padding: 18px 18px 22px;
+    }
+    .card h1 { margin: 6px 0 8px; font-size: 22px; }
+    .card h2 { margin: 10px 0 10px; font-size: 18px; color: #dbeafe; }
+    .card p { line-height: 1.4; }
+    .choices { display: grid; gap: 10px; margin-top: 14px; }
+    .choice {
+      background: #ffffff10;
+      border: 1px solid #ffffff24;
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background .2s ease, border-color .2s ease, transform .06s ease;
+    }
+    .choice:hover { background: #ffffff18; transform: translateY(-1px); }
+    .choice.correct { background: #10b98122; border-color: #10b981; }
+    .choice.wrong { background: #ef444422; border-color: #ef4444; }
+
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+    .kbd {
+      background: #0b1220aa;
+      padding: 4px 8px;
+      border: 1px solid #ffffff30;
+      border-bottom-width: 3px;
+      border-radius: 8px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    .row { display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+    .row .right { opacity: .85; font-size: 14px; }
+    .badge { padding: 2px 8px; border-radius: 999px; background: #ffffff14; border: 1px solid #ffffff22; font-size: 12px; }
+    .footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; gap: 10px; }
+
+    .list { padding-left: 18px; }
+    .list li { margin: 4px 0; }
+  </style>
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="game" width="1100" height="660" aria-label="Week 2 CS Review Platformer"></canvas>
+  </div>
+
+  <div id="hud">
+    <div class="pill" id="score">Score: 0</div>
+    <div class="pill" id="lives">Lives: ❤️❤️❤️</div>
+    <div class="pill" id="progress">Q: 0/12</div>
+    <button id="btnPause" title="Pause (P)">Pause</button>
+    <button id="btnHelp" title="Study Guide (H)">Study</button>
+    <button id="btnReset" title="Reset (R)">Reset</button>
+  </div>
+
+  <!-- Start Menu -->
+  <div class="modal show" id="menu">
+    <div class="card">
+      <h1>Week 2 Platformer Review</h1>
+      <p>Collect the purple question blocks to answer review questions. Get it right to boost your score. Miss it and you lose a life. Reach the flag with your knowledge intact.</p>
+      <h2>Controls</h2>
+      <div class="controls">
+        <span class="kbd">←</span>
+        <span class="kbd">→</span>
+        <span class="kbd">A</span>
+        <span class="kbd">D</span>
+        <span class="kbd">Space</span>
+        <span class="kbd">W</span>
+        <span class="kbd">P</span>
+        <span class="kbd">H</span>
+        <span class="kbd">R</span>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div class="right">Move, Jump, Pause, Study, Reset</div>
+        <span class="badge">Tip: Keys 1-4 answer choices fast</span>
+      </div>
+      <div class="footer">
+        <button class="btn" id="startBtn">Start</button>
+        <div class="right">Unit: Application and OS interaction, Abstraction</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Question Modal -->
+  <div class="modal" id="quiz">
+    <div class="card">
+      <h1 id="qTitle">Question</h1>
+      <p id="qText"></p>
+      <div class="choices" id="qChoices"></div>
+      <p id="qExplain" style="margin-top:8px; opacity:.9"></p>
+      <div class="footer">
+        <span id="qStatus" class="badge">Pick the best answer</span>
+        <button class="btn" id="qContinue" disabled>Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Study Guide Modal -->
+  <div class="modal" id="help">
+    <div class="card">
+      <h1>Study Guide</h1>
+      <h2>Key Vocabulary</h2>
+      <ul class="list">
+        <li><b>Application Software</b>: Programs that help users perform tasks (Word, TikTok, Chrome).</li>
+        <li><b>System Software</b>: The operating system that manages hardware and lets applications run (Windows, iOS, Linux).</li>
+        <li><b>Hardware</b>: Physical parts of a computer system (CPU, RAM, keyboard, printer).</li>
+        <li><b>Abstraction</b>: Hiding unnecessary details and showing only what the user needs.</li>
+        <li><b>Embedded System</b>: A computer built into another device (microwave, smartwatch, car system).</li>
+      </ul>
+      <h2>Notes</h2>
+      <p><b>Layers of a Computing System</b> → Apps → Operating System → Hardware.</p>
+      <ul class="list">
+        <li>Example: Printing → Word asks OS → OS uses printer driver → Printer prints.</li>
+        <li>Abstraction: Camera snap hides focus, sensors, CPU image processing, file saves.</li>
+        <li>Abstraction: Microwave button hides magnetron control, timers, motor, voltage handling.</li>
+        <li>Abstraction: Steering wheel hides steering column, power assist, wheel angle changes.</li>
+      </ul>
+      <div class="footer">
+        <button class="btn" id="helpClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Modal -->
+  <div class="modal" id="end">
+    <div class="card">
+      <h1 id="endTitle">Great job</h1>
+      <p id="endMsg">You made it to the flag. Knowledge unlocked.</p>
+      <div class="footer">
+        <button class="btn" id="again">Play Again</button>
+        <span class="badge" id="finalStats"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // Helper RNG
+  const rand = (a,b) => Math.random()*(b-a)+a;
+
+  // Questions based on the study guide
+  const QUESTION_BANK = [
+    {
+      id: 1,
+      q: "What is the main job of the Operating System?",
+      choices: [
+        "Manage hardware, run system processes, and allow apps to work with hardware",
+        "Display websites and play videos",
+        "Print documents without any drivers",
+        "Make the computer look pretty"
+      ],
+      answer: 0,
+      explain: "The OS is the bridge between apps and hardware, managing resources and processes."
+    },
+    {
+      id: 2,
+      q: "Why cannot applications run without system software?",
+      choices: [
+        "Apps dislike talking to hardware",
+        "They need the OS to translate user commands into hardware instructions",
+        "Hardware only accepts voice commands",
+        "Browsers are allergic to RAM"
+      ],
+      answer: 1,
+      explain: "The OS translates high level app requests into low level hardware actions."
+    },
+    {
+      id: 3,
+      q: "Which option best defines abstraction?",
+      choices: [
+        "Showing all hardware details at once",
+        "Hiding complex details and showing only what is needed",
+        "Deleting features from an app",
+        "Turning off background processes"
+      ],
+      answer: 1,
+      explain: "Abstraction hides complexity so users and programmers can focus on the task."
+    },
+    {
+      id: 4,
+      q: "Which of these is application software?",
+      choices: [
+        "Microsoft Word",
+        "CPU",
+        "RAM",
+        "Power supply"
+      ],
+      answer: 0,
+      explain: "Word is an app for users. CPU, RAM, and PSU are hardware."
+    },
+    {
+      id: 5,
+      q: "Which of these is system software?",
+      choices: [
+        "Linux",
+        "Keyboard",
+        "TikTok",
+        "Printer"
+      ],
+      answer: 0,
+      explain: "Linux is an operating system."
+    },
+    {
+      id: 6,
+      q: "Pick the hardware item:",
+      choices: [
+        "CPU",
+        "Google Chrome",
+        "iOS",
+        "Files app"
+      ],
+      answer: 0,
+      explain: "CPU is physical hardware."
+    },
+    {
+      id: 7,
+      q: "Which is an embedded system?",
+      choices: [
+        "Microwave control unit",
+        "Desktop tower",
+        "External hard drive",
+        "Cloud server"
+      ],
+      answer: 0,
+      explain: "A microwave has a computer built in to run it."
+    },
+    {
+      id: 8,
+      q: "Smartphone camera is an example of abstraction because...",
+      choices: [
+        "You must manually focus every lens element",
+        "You tap a button while details like focus, processing, and saving are hidden",
+        "It only works in airplane mode",
+        "It hides the battery"
+      ],
+      answer: 1,
+      explain: "The camera UI hides complex steps behind a simple action."
+    },
+    {
+      id: 9,
+      q: "In printing a document, what does the OS use to talk to the printer?",
+      choices: [
+        "Printer drivers",
+        "Screen brightness",
+        "A random number",
+        "Power button"
+      ],
+      answer: 0,
+      explain: "Drivers translate between OS and device hardware."
+    },
+    {
+      id: 10,
+      q: "ATM example: which is a hidden detail?",
+      choices: [
+        "Insert card and enter PIN",
+        "Encryption of the PIN and secure server communication",
+        "You selecting withdrawal on screen",
+        "Touching the buttons"
+      ],
+      answer: 1,
+      explain: "Security and backend communication are hidden from the user."
+    },
+    {
+      id: 11,
+      q: "Why is abstraction important in computing?",
+      choices: [
+        "It makes tech user friendly and lets devs focus on higher level tasks",
+        "It slows down programs",
+        "It removes security",
+        "It removes the OS"
+      ],
+      answer: 0,
+      explain: "Abstraction reduces complexity so users and developers can work efficiently."
+    },
+    {
+      id: 12,
+      q: "Playing Spotify: where is the OS involved?",
+      choices: [
+        "Translating the app command into instructions for the audio driver and sound card",
+        "Picking your favorite songs for you",
+        "Designing album art",
+        "Buying concert tickets"
+      ],
+      answer: 0,
+      explain: "The OS routes audio through drivers to hardware."
+    }
+  ];
+
+  // Game constants
+  const CANVAS_W = 1100;
+  const CANVAS_H = 660;
+  const GRAVITY = 0.9;
+  const MOVE_SPEED = 5.2;
+  const JUMP_VEL = -17.5;
+  const MAX_VEL_Y = 20;
+
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+
+  const hudScore = document.getElementById('score');
+  const hudLives = document.getElementById('lives');
+  const hudProg  = document.getElementById('progress');
+
+  const menu = document.getElementById('menu');
+  const startBtn = document.getElementById('startBtn');
+  const btnPause = document.getElementById('btnPause');
+  const btnHelp = document.getElementById('btnHelp');
+  const btnReset = document.getElementById('btnReset');
+
+  const quiz = document.getElementById('quiz');
+  const qTitle = document.getElementById('qTitle');
+  const qText = document.getElementById('qText');
+  const qChoices = document.getElementById('qChoices');
+  const qExplain = document.getElementById('qExplain');
+  const qStatus = document.getElementById('qStatus');
+  const qContinue = document.getElementById('qContinue');
+
+  const help = document.getElementById('help');
+  const helpClose = document.getElementById('helpClose');
+
+  const end = document.getElementById('end');
+  const endTitle = document.getElementById('endTitle');
+  const endMsg = document.getElementById('endMsg');
+  const again = document.getElementById('again');
+  const finalStats = document.getElementById('finalStats');
+
+  const keys = new Set();
+
+  // World data
+  let cameraX = 0;
+  let worldW = 3800;
+
+  // Player
+  const player = { x: 80, y: 0, w: 36, h: 46, vx: 0, vy: 0, onGround: false, facing: 1 };
+
+  // Platforms
+  let platforms = [];
+  // Question blocks
+  let qblocks = [];
+  // Goal flag
+  let goal = { x: worldW - 140, y: CANVAS_H - 260, w: 20, h: 200 };
+
+  // Stats
+  let score = 0;
+  let lives = 3;
+  let answered = 0;
+  let usedIds = new Set();
+
+  // State
+  let state = 'menu'; // menu, playing, paused, question, gameover, win
+  let currentQuestion = null;
+
+  function resetWorld() {
+    cameraX = 0;
+    worldW = 3800;
+    Object.assign(player, { x: 80, y: 0, vx: 0, vy: 0, onGround: false, facing: 1 });
+
+    // Build platforms
+    platforms = [];
+    const groundY = CANVAS_H - 60;
+    platforms.push({x: 0, y: groundY, w: worldW, h: 60});
+
+    // Floating platforms sections
+    const floats = [
+      {x: 300, y: groundY - 140, w: 200, h: 20},
+      {x: 560, y: groundY - 220, w: 180, h: 20},
+      {x: 820, y: groundY - 140, w: 200, h: 20},
+      {x: 1180, y: groundY - 190, w: 220, h: 20},
+      {x: 1520, y: groundY - 260, w: 160, h: 20},
+      {x: 1770, y: groundY - 180, w: 200, h: 20},
+      {x: 2050, y: groundY - 120, w: 160, h: 20},
+      {x: 2360, y: groundY - 210, w: 220, h: 20},
+      {x: 2700, y: groundY - 150, w: 180, h: 20},
+      {x: 3000, y: groundY - 220, w: 220, h: 20},
+      {x: 3300, y: groundY - 160, w: 180, h: 20},
+    ];
+    platforms.push(...floats);
+
+    // Question blocks placed along the level
+    qblocks = [];
+    const qXs = [360, 610, 880, 1220, 1540, 1790, 2080, 2390, 2730, 3050, 3320, 3500];
+    const groundBlockYs = [groundY - 80, groundY - 160, groundY - 80, groundY - 120, groundY - 180, groundY - 110, groundY - 60, groundY - 150, groundY - 90, groundY - 160, groundY - 100, groundY - 140];
+    for (let i = 0; i < qXs.length; i++) {
+      qblocks.push({ x: qXs[i], y: groundBlockYs[i], w: 34, h: 34, used: false });
+    }
+  }
+
+  function drawBackground() {
+    // Hills and clouds
+    const base = CANVAS_H - 60;
+    ctx.save();
+    ctx.translate(-cameraX*0.4, 0); // parallax
+
+    // Clouds
+    for (let i=0;i<6;i++) {
+      const cx = i*700 + 120;
+      const cy = 100 + (i%2)*40;
+      drawCloud(cx, cy);
+    }
+
+    // Hills
+    for (let i=0;i<7;i++) {
+      const hx = i*600 + 120;
+      drawHill(hx, base, 240);
+    }
+
+    ctx.restore();
+  }
+
+  function drawHill(x, baseY, r) {
+    ctx.fillStyle = '#94d976';
+    ctx.beginPath();
+    ctx.arc(x - cameraX*0.2, baseY, r, Math.PI, 2*Math.PI);
+    ctx.fill();
+  }
+  function drawCloud(x,y) {
+    ctx.fillStyle = '#ffffffcc';
+    const parts = [
+      {dx:0, dy:0, r:28}, {dx:24, dy:-12, r:24}, {dx:48, dy:0, r:28}, {dx:20, dy:10, r:20}
+    ];
+    parts.forEach(p=>{ ctx.beginPath(); ctx.arc(x+p.dx - cameraX*0.2, y+p.dy, p.r, 0, Math.PI*2); ctx.fill(); });
+  }
+
+  function drawGround() {
+    ctx.save();
+    ctx.translate(-cameraX, 0);
+    // Grass top
+    ctx.fillStyle = getGradient(0, CANVAS_H-60, 0, CANVAS_H-40, '#49a145', '#6ddf59');
+    ctx.fillRect(0, CANVAS_H-60, worldW, 10);
+
+    // Dirt body
+    ctx.fillStyle = getGradient(0, CANVAS_H-50, 0, CANVAS_H, '#6b4a33', '#4a3324');
+    ctx.fillRect(0, CANVAS_H-50, worldW, 50);
+
+    // Brick pattern top border
+    ctx.fillStyle = '#2d2016';
+    for (let x=0; x<worldW; x+=20) ctx.fillRect(x, CANVAS_H-50, 18, 2);
+
+    // Platforms
+    platforms.forEach(p=>{
+      ctx.fillStyle = '#8b5a3c';
+      ctx.fillRect(p.x, p.y, p.w, p.h);
+      // simple brick caps
+      ctx.fillStyle = '#6a3f28';
+      ctx.fillRect(p.x, p.y, p.w, 6);
+    });
+
+    // Question blocks
+    qblocks.forEach(b=>{
+      if (b.used) return;
+      drawQBlock(b.x, b.y, b.w, b.h);
+    });
+
+    // Goal flag
+    drawFlag(goal.x, goal.y, goal.w, goal.h);
+
+    ctx.restore();
+  }
+
+  function getGradient(x0, y0, x1, y1, c0, c1) {
+    const g = ctx.createLinearGradient(x0, y0, x1, y1);
+    g.addColorStop(0, c0); g.addColorStop(1, c1);
+    return g;
+  }
+
+  function drawQBlock(x,y,w,h){
+    ctx.fillStyle = '#7c3aed'; // purple block
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = '#ffffffaa';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x+2, y+2, w-4, h-4);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '20px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('?', x + w/2, y + h/2 + 1);
+  }
+
+  function drawFlag(x,y,w,h){
+    ctx.fillStyle = '#c5c5c5';
+    ctx.fillRect(x, y - 10, 6, h + 10);
+    ctx.beginPath();
+    ctx.moveTo(x+6, y+20);
+    ctx.lineTo(x+6+80, y+40);
+    ctx.lineTo(x+6, y+60);
+    ctx.closePath();
+    ctx.fillStyle = '#22c55e';
+    ctx.fill();
+  }
+
+  function drawPlayer() {
+    ctx.save();
+    ctx.translate(-cameraX, 0);
+    // shadow
+    ctx.fillStyle = '#00000025';
+    ctx.beginPath();
+    ctx.ellipse(player.x + player.w/2, player.y + player.h + 6, player.w*0.5, 6, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // body
+    ctx.fillStyle = '#2563eb';
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+    // hat
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillRect(player.x-4, player.y-8, player.w+8, 10);
+    // face simple
+    ctx.fillStyle = '#ffffffcc';
+    const eyeX = player.facing >= 0 ? player.x+24 : player.x+12;
+    ctx.fillRect(eyeX, player.y+14, 6, 6);
+
+    // little arm
+    ctx.fillStyle = '#1d4ed8';
+    ctx.fillRect(player.x + (player.facing>=0?player.w-6:-2), player.y+20, 4, 10);
+    ctx.restore();
+  }
+
+  function aabb(a,b){
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+
+  function update(dt) {
+    if (state !== 'playing') return;
+
+    // Input
+    const left = keys.has('ArrowLeft') || keys.has('a');
+    const right = keys.has('ArrowRight') || keys.has('d');
+    const jump = keys.has(' ') || keys.has('w') || keys.has('ArrowUp');
+
+    player.vx = 0;
+    if (left) { player.vx = -MOVE_SPEED; player.facing = -1; }
+    if (right) { player.vx = MOVE_SPEED; player.facing = 1; }
+
+    if (jump && player.onGround) {
+      player.vy = JUMP_VEL;
+      player.onGround = false;
+    }
+
+    // Physics
+    player.vy += GRAVITY;
+    if (player.vy > MAX_VEL_Y) player.vy = MAX_VEL_Y;
+
+    // Horizontal move
+    player.x += player.vx;
+
+    // Collide X
+    platforms.forEach(p=>{
+      if (aabb(player, p)) {
+        if (player.vx > 0) player.x = p.x - player.w;
+        else if (player.vx < 0) player.x = p.x + p.w;
+      }
+    });
+
+    // Vertical move
+    player.y += player.vy;
+    player.onGround = false;
+
+    // Collide Y
+    platforms.forEach(p=>{
+      if (aabb(player, p)) {
+        if (player.vy > 0) { // falling
+          player.y = p.y - player.h;
+          player.vy = 0;
+          player.onGround = true;
+        } else if (player.vy < 0) { // jumping up
+          player.y = p.y + p.h;
+          player.vy = 0;
+        }
+      }
+    });
+
+    // Bounds
+    if (player.x < 0) player.x = 0;
+    if (player.x + player.w > worldW) player.x = worldW - player.w;
+
+    // Fell
+    if (player.y > CANVAS_H + 200) loseLife();
+
+    // Question blocks collision
+    for (const b of qblocks) {
+      if (!b.used && aabb(player, b)) {
+        triggerQuestion(b);
+        break;
+      }
+    }
+
+    // Goal check
+    if (answered >= 12 && aabb(player, goal)) {
+      winGame();
+    }
+
+    // Camera follows
+    const target = player.x + player.w/2 - CANVAS_W/2;
+    cameraX += (Math.max(0, Math.min(worldW - CANVAS_W, target)) - cameraX) * 0.08;
+  }
+
+  function loseLife() {
+    lives--;
+    updateHud();
+    if (lives <= 0) {
+      gameOver();
+      return;
+    }
+    // respawn
+    Object.assign(player, { x: 80, y: 0, vx: 0, vy: 0, onGround: false });
+    cameraX = Math.max(0, player.x - CANVAS_W/2);
+  }
+
+  function triggerQuestion(block){
+    currentQuestion = nextQuestion();
+    if (!currentQuestion) return; // should not happen
+    block.used = true;
+    openQuiz(currentQuestion);
+    state = 'question';
+  }
+
+  function nextQuestion(){
+    const remaining = QUESTION_BANK.filter(q=>!usedIds.has(q.id));
+    if (remaining.length === 0) return null;
+    const q = remaining[Math.floor(Math.random()*remaining.length)];
+    usedIds.add(q.id);
+    return q;
+  }
+
+  function openQuiz(q){
+    qTitle.textContent = `Question ${usedIds.size}`;
+    qText.textContent = q.q;
+    qExplain.textContent = '';
+    qStatus.textContent = 'Pick the best answer';
+    qContinue.disabled = true;
+
+    qChoices.innerHTML = '';
+    q.choices.forEach((c, idx)=>{
+      const div = document.createElement('div');
+      div.className = 'choice';
+      div.textContent = `${idx+1}. ${c}`;
+      div.addEventListener('click', ()=> answerQuiz(q, idx, div));
+      qChoices.appendChild(div);
+    });
+
+    quiz.classList.add('show');
+  }
+
+  function answerQuiz(q, idx, el){
+    // prevent double answer
+    if (qContinue.disabled === false) return;
+
+    [...qChoices.children].forEach((child, i)=>{
+      if (i === q.answer) child.classList.add('correct');
+      if (i === idx && idx !== q.answer) child.classList.add('wrong');
+    });
+
+    const correct = idx === q.answer;
+    if (correct) {
+      score += 100;
+      answered += 1;
+      qStatus.textContent = 'Correct';
+    } else {
+      score = Math.max(0, score - 30);
+      lives -= 1;
+      qStatus.textContent = 'Incorrect';
+      if (lives <= 0) { updateHud(); gameOver(true); return; }
+    }
+    qExplain.textContent = q.explain;
+    updateHud();
+    qContinue.disabled = false;
+  }
+
+  function closeQuiz(){ quiz.classList.remove('show'); }
+
+  function gameOver(fromQuiz=false){
+    state = 'gameover';
+    endTitle.textContent = 'Game Over';
+    endMsg.textContent = fromQuiz ? 'Keep practicing the study guide and try again.' : 'Careful with those jumps. Review and retry.';
+    finalStats.textContent = `Score ${score} • Q ${answered}/12`;
+    end.classList.add('show');
+  }
+
+  function winGame(){
+    state = 'win';
+    endTitle.textContent = 'Victory';
+    endMsg.textContent = 'You reached the flag and cleared the review.';
+    finalStats.textContent = `Score ${score} • Q ${answered}/12`;
+    end.classList.add('show');
+  }
+
+  function updateHud(){
+    hudScore.textContent = `Score: ${score}`;
+    const hearts = lives <= 0 ? '' : '❤️'.repeat(lives);
+    hudLives.textContent = `Lives: ${hearts}`;
+    hudProg.textContent = `Q: ${answered}/12`;
+  }
+
+  function render(){
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    drawBackground();
+    drawGround();
+    drawPlayer();
+
+    // Foreground hint when near flag
+    if (answered < 12) {
+      ctx.save();
+      ctx.translate(-cameraX,0);
+      ctx.fillStyle = '#00000055';
+      ctx.font = '16px system-ui, sans-serif';
+      ctx.fillText('Answer all 12 questions to unlock the flag', goal.x - 120, goal.y - 12);
+      ctx.restore();
+    }
+  }
+
+  let last = 0;
+  function loop(ts){
+    const dt = (ts - last) / 16.67; // normalize to ~60fps units
+    last = ts;
+    update(dt);
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  // Input
+  window.addEventListener('keydown', (e)=>{
+    const k = e.key;
+    if (['ArrowLeft','ArrowRight','ArrowUp',' ','a','d','w'].includes(k)) e.preventDefault();
+    keys.add(k);
+
+    if (state === 'playing') {
+      if (k.toLowerCase() === 'p') togglePause();
+      if (k.toLowerCase() === 'h') toggleHelp();
+      if (k.toLowerCase() === 'r') resetGame();
+    }
+
+    if (state === 'question') {
+      if (['1','2','3','4'].includes(k) && currentQuestion) {
+        const idx = parseInt(k, 10) - 1;
+        const node = qChoices.children[idx];
+        if (node) answerQuiz(currentQuestion, idx, node);
+      }
+    }
+  });
+  window.addEventListener('keyup', (e)=> keys.delete(e.key));
+
+  function togglePause(){
+    if (state === 'playing') { state = 'paused'; menu.classList.add('show'); startBtn.textContent = 'Resume'; }
+    else if (state === 'paused') { state = 'playing'; menu.classList.remove('show'); startBtn.textContent = 'Start'; }
+  }
+  function toggleHelp(){
+    if (help.classList.contains('show')) help.classList.remove('show');
+    else help.classList.add('show');
+  }
+
+  function resetGame(){
+    score = 0; lives = 3; answered = 0; usedIds = new Set();
+    resetWorld(); updateHud(); state = 'playing';
+  }
+
+  // Buttons
+  startBtn.addEventListener('click', ()=>{ menu.classList.remove('show'); if (state!=='paused') resetGame(); state = 'playing'; });
+  btnPause.addEventListener('click', togglePause);
+  btnHelp.addEventListener('click', toggleHelp);
+  helpClose.addEventListener('click', toggleHelp);
+  btnReset.addEventListener('click', resetGame);
+  qContinue.addEventListener('click', ()=>{ closeQuiz(); state = 'playing'; });
+  again.addEventListener('click', ()=>{ end.classList.remove('show'); resetGame(); });
+
+  // Init
+  resetWorld();
+  updateHud();
+  requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
