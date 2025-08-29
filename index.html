@@ -3,400 +3,146 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Week 2 CS Review Platformer</title>
+  <title>Week 2 Review Platformer - Fresh Build</title>
   <style>
-    :root {
-      --bg: #0b1220;
-      --sky1: #7cc3ff;
-      --sky2: #b7e3ff;
-      --ground: #5a3e2b;
-      --grass: #61c654;
-      --brick: #b75b3c;
-      --coin: #ffd23f;
-      --player: #3a7afe;
-      --enemy: #ff4d4f;
-      --white: #ffffff;
-      --panel: #0f172aee;
-      --accent: #8b5cf6;
-      --good: #22c55e;
-      --bad: #ef4444;
-      --hud: #0b1220aa;
+    :root{
+      --sky1:#7cc3ff;--sky2:#b7e3ff;--panel:#0f172aee;--hud:#0b1220aa;--accent:#8b5cf6;--good:#22c55e;--bad:#ef4444;
     }
-    html, body {
-      height: 100%;
-      margin: 0;
-      background: radial-gradient(1200px 800px at 50% -200px, var(--sky2), var(--sky1));
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      color: var(--white);
-      user-select: none;
-    }
-    #wrap {
-      display: grid;
-      place-items: center;
-      height: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-    }
-    canvas {
-      background: linear-gradient(180deg, var(--sky2) 0%, var(--sky1) 60%, #7ed5ff 100%);
-      width: min(100vw - 16px, 1100px);
-      height: calc(min(100vw - 16px, 1100px) * 0.6);
-      max-height: 75vh;
-      border-radius: 16px;
-      box-shadow: 0 20px 60px #00000040, 0 1px 0 #ffffff20 inset;
-      outline: 2px solid #ffffff10;
-    }
-    #hud {
-      position: fixed;
-      inset: 12px 12px auto 12px;
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      background: var(--hud);
-      padding: 8px 12px;
-      border-radius: 12px;
-      backdrop-filter: blur(6px);
-      font-weight: 600;
-    }
-    #hud .pill {
-      padding: 6px 10px;
-      background: #00000040;
-      border-radius: 10px;
-    }
-    #hud button, .btn {
-      all: unset;
-      background: #ffffff18;
-      padding: 6px 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: transform .08s ease, background .2s ease;
-      border: 1px solid #ffffff22;
-    }
-    #hud button:hover, .btn:hover { transform: translateY(-1px); background: #ffffff28; }
-    #hud button:active, .btn:active { transform: translateY(0); }
+    html,body{height:100%;margin:0;background:radial-gradient(1200px 800px at 50% -200px,var(--sky2),var(--sky1));font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:#fff;user-select:none}
+    #wrap{height:100%;display:grid;place-items:center;padding:8px;box-sizing:border-box}
+    canvas{background:linear-gradient(180deg,var(--sky2) 0%,var(--sky1) 60%,#7ed5ff 100%);width:min(100vw - 16px,1100px);height:calc(min(100vw - 16px,1100px) * 0.6);max-height:75vh;border-radius:16px;box-shadow:0 20px 60px #0006,0 1px 0 #fff2 inset;outline:2px solid #ffffff10}
+    #hud{position:fixed;inset:12px 12px auto 12px;display:flex;gap:12px;align-items:center;background:var(--hud);padding:8px 12px;border-radius:12px;backdrop-filter:blur(6px);font-weight:600;z-index:20}
+    #hud .pill{padding:6px 10px;background:#0005;border-radius:10px}
+    #hud button,.btn{all:unset;background:#fff2;padding:6px 10px;border-radius:10px;cursor:pointer;transition:transform .08s ease, background .2s ease;border:1px solid #ffffff33}
+    #hud button:hover,.btn:hover{transform:translateY(-1px);background:#fff3}
 
-    .modal {
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: #020617cc;
-      padding: 20px;
-      z-index: 10;
-    }
-    .modal.show { display: flex; }
-    .card {
-      width: min(900px, 92vw);
-      max-height: 84vh;
-      overflow: auto;
-      background: var(--panel);
-      border: 1px solid #ffffff22;
-      box-shadow: 0 30px 80px #00000060;
-      border-radius: 16px;
-      padding: 18px 18px 22px;
-    }
-    .card h1 { margin: 6px 0 8px; font-size: 22px; }
-    .card h2 { margin: 10px 0 10px; font-size: 18px; color: #dbeafe; }
-    .card p { line-height: 1.4; }
-    .choices { display: grid; gap: 10px; margin-top: 14px; }
-    .choice {
-      background: #ffffff10;
-      border: 1px solid #ffffff24;
-      padding: 10px 12px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background .2s ease, border-color .2s ease, transform .06s ease;
-    }
-    .choice:hover { background: #ffffff18; transform: translateY(-1px); }
-    .choice.correct { background: #10b98122; border-color: #10b981; }
-    .choice.wrong { background: #ef444422; border-color: #ef4444; }
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#020617cc;padding:20px;z-index:30}
+    .modal.show{display:flex}
+    .card{width:min(980px,92vw);max-height:84vh;overflow:auto;background:var(--panel);border:1px solid #ffffff22;box-shadow:0 30px 80px #000c;border-radius:16px;padding:18px}
+    .card h1{margin:6px 0 8px;font-size:22px}
+    .card h2{margin:10px 0 10px;font-size:18px;color:#dbeafe}
+    .choices{display:grid;gap:10px;margin-top:14px}
+    .choice{background:#ffffff10;border:1px solid #ffffff24;padding:10px 12px;border-radius:12px;cursor:pointer}
+    .choice:hover{background:#ffffff18;transform:translateY(-1px)}
+    .choice.correct{background:#10b98122;border-color:#10b981}
+    .choice.wrong{background:#ef444422;border-color:#ef4444}
 
-    .controls { display: flex; gap: 8px; flex-wrap: wrap; }
-    .kbd {
-      background: #0b1220aa;
-      padding: 4px 8px;
-      border: 1px solid #ffffff30;
-      border-bottom-width: 3px;
-      border-radius: 8px;
-      font-weight: 700;
-      letter-spacing: .2px;
-    }
-    .row { display: flex; gap: 10px; align-items: center; justify-content: space-between; }
-    .row .right { opacity: .85; font-size: 14px; }
-    .badge { padding: 2px 8px; border-radius: 999px; background: #ffffff14; border: 1px solid #ffffff22; font-size: 12px; }
-    .footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; gap: 10px; }
-
-    .list { padding-left: 18px; }
-    .list li { margin: 4px 0; }
+    .level-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:10px}
+    .level-tile{background:#ffffff10;border:1px solid #ffffff24;padding:14px;border-radius:12px;cursor:pointer}
+    .level-tile:hover{background:#ffffff18;transform:translateY(-1px)}
+    .tag{font-size:11px;padding:2px 6px;border-radius:999px;background:#ffffff14;border:1px solid #ffffff22;margin-right:6px}
   </style>
 </head>
 <body>
   <div id="wrap">
-    <canvas id="game" width="1100" height="660" aria-label="Week 2 CS Review Platformer"></canvas>
+    <canvas id="game" width="1100" height="660" aria-label="Week 2 Review Platformer"></canvas>
   </div>
 
   <div id="hud">
     <div class="pill" id="score">Score: 0</div>
-    <div class="pill" id="lives">Lives: ❤️❤️❤️</div>
+    <div class="pill" id="lives">Lives: ❤️ x10</div>
     <div class="pill" id="progress">Q: 0/12</div>
     <button id="btnPause" title="Pause (P)">Pause</button>
-    <button id="btnHelp" title="Study Guide (H)">Study</button>
+    <button id="btnHelp" title="Study (H)">Study</button>
     <button id="btnReset" title="Reset (R)">Reset</button>
+    <button id="btnBossImg" title="Upload Boss Image">Boss Img</button>
+    <input type="file" id="bossFile" accept="image/*" style="display:none" />
   </div>
 
-  <!-- Start Menu -->
   <div class="modal show" id="menu">
     <div class="card">
       <h1>Week 2 Platformer Review</h1>
-      <p>Collect the purple question blocks to answer review questions. Get it right to boost your score. Miss it and you lose a life. Reach the flag with your knowledge intact.</p>
-      <h2>Controls</h2>
-      <div class="controls">
-        <span class="kbd">←</span>
-        <span class="kbd">→</span>
-        <span class="kbd">A</span>
-        <span class="kbd">D</span>
-        <span class="kbd">Space</span>
-        <span class="kbd">W</span>
-        <span class="kbd">P</span>
-        <span class="kbd">H</span>
-        <span class="kbd">R</span>
-      </div>
-      <div class="row" style="margin-top:8px">
-        <div class="right">Move, Jump, Pause, Study, Reset</div>
-        <span class="badge">Tip: Keys 1-4 answer choices fast</span>
-      </div>
-      <div class="footer">
-        <button class="btn" id="startBtn">Start</button>
-        <div class="right">Unit: Application and OS interaction, Abstraction</div>
-      </div>
+      <p>Pick a level. Controls: arrows or A D to move, Space or W or Up to jump, H opens Study. In the boss level press F to throw Knowledge Orbs. Click a tile to start.</p>
+      <h2>Levels</h2>
+      <div id="levelList" class="level-grid"></div>
     </div>
   </div>
 
-  <!-- Question Modal -->
   <div class="modal" id="quiz">
     <div class="card">
       <h1 id="qTitle">Question</h1>
       <p id="qText"></p>
-      <div class="choices" id="qChoices"></div>
-      <p id="qExplain" style="margin-top:8px; opacity:.9"></p>
-      <div class="footer">
-        <span id="qStatus" class="badge">Pick the best answer</span>
+      <div id="qChoices" class="choices"></div>
+      <p id="qExplain" style="opacity:.9"></p>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+        <span id="qStatus" class="tag">Pick the best answer</span>
         <button class="btn" id="qContinue" disabled>Continue</button>
       </div>
     </div>
   </div>
 
-  <!-- Study Guide Modal -->
   <div class="modal" id="help">
     <div class="card">
       <h1>Study Guide</h1>
       <h2>Key Vocabulary</h2>
-      <ul class="list">
-        <li><b>Application Software</b>: Programs that help users perform tasks (Word, TikTok, Chrome).</li>
-        <li><b>System Software</b>: The operating system that manages hardware and lets applications run (Windows, iOS, Linux).</li>
-        <li><b>Hardware</b>: Physical parts of a computer system (CPU, RAM, keyboard, printer).</li>
-        <li><b>Abstraction</b>: Hiding unnecessary details and showing only what the user needs.</li>
-        <li><b>Embedded System</b>: A computer built into another device (microwave, smartwatch, car system).</li>
+      <ul>
+        <li><b>Application Software</b>: user programs like Word, Chrome, TikTok.</li>
+        <li><b>System Software</b>: the operating system like Windows, iOS, Linux.</li>
+        <li><b>Hardware</b>: CPU, RAM, keyboard, printer and other physical parts.</li>
+        <li><b>Abstraction</b>: hiding details and showing only what is needed.</li>
+        <li><b>Embedded System</b>: a computer built into another device like a microwave.</li>
       </ul>
-      <h2>Notes</h2>
-      <p><b>Layers of a Computing System</b> → Apps → Operating System → Hardware.</p>
-      <ul class="list">
-        <li>Example: Printing → Word asks OS → OS uses printer driver → Printer prints.</li>
-        <li>Abstraction: Camera snap hides focus, sensors, CPU image processing, file saves.</li>
-        <li>Abstraction: Microwave button hides magnetron control, timers, motor, voltage handling.</li>
-        <li>Abstraction: Steering wheel hides steering column, power assist, wheel angle changes.</li>
-      </ul>
-      <div class="footer">
-        <button class="btn" id="helpClose">Close</button>
-      </div>
+      <h2>Layers and examples</h2>
+      <p>Apps ask the OS. The OS uses drivers. Hardware does the work. Example: Printing - Word asks OS, OS uses printer driver, printer prints.</p>
+      <button class="btn" id="helpClose">Close</button>
     </div>
   </div>
 
-  <!-- End Modal -->
   <div class="modal" id="end">
     <div class="card">
       <h1 id="endTitle">Great job</h1>
-      <p id="endMsg">You made it to the flag. Knowledge unlocked.</p>
-      <div class="footer">
-        <button class="btn" id="again">Play Again</button>
-        <span class="badge" id="finalStats"></span>
+      <p id="endMsg">You finished.</p>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+        <button class="btn" id="again">Level Select</button>
+        <span class="tag" id="finalStats"></span>
       </div>
     </div>
   </div>
 
   <script>
-  // Helper RNG
-  const rand = (a,b) => Math.random()*(b-a)+a;
+  // Utility
+  const rand = (a,b)=>Math.random()*(b-a)+a;
 
-  // Questions based on the study guide
+  // Questions
   const QUESTION_BANK = [
-    {
-      id: 1,
-      q: "What is the main job of the Operating System?",
-      choices: [
-        "Manage hardware, run system processes, and allow apps to work with hardware",
-        "Display websites and play videos",
-        "Print documents without any drivers",
-        "Make the computer look pretty"
-      ],
-      answer: 0,
-      explain: "The OS is the bridge between apps and hardware, managing resources and processes."
-    },
-    {
-      id: 2,
-      q: "Why cannot applications run without system software?",
-      choices: [
-        "Apps dislike talking to hardware",
-        "They need the OS to translate user commands into hardware instructions",
-        "Hardware only accepts voice commands",
-        "Browsers are allergic to RAM"
-      ],
-      answer: 1,
-      explain: "The OS translates high level app requests into low level hardware actions."
-    },
-    {
-      id: 3,
-      q: "Which option best defines abstraction?",
-      choices: [
-        "Showing all hardware details at once",
-        "Hiding complex details and showing only what is needed",
-        "Deleting features from an app",
-        "Turning off background processes"
-      ],
-      answer: 1,
-      explain: "Abstraction hides complexity so users and programmers can focus on the task."
-    },
-    {
-      id: 4,
-      q: "Which of these is application software?",
-      choices: [
-        "Microsoft Word",
-        "CPU",
-        "RAM",
-        "Power supply"
-      ],
-      answer: 0,
-      explain: "Word is an app for users. CPU, RAM, and PSU are hardware."
-    },
-    {
-      id: 5,
-      q: "Which of these is system software?",
-      choices: [
-        "Linux",
-        "Keyboard",
-        "TikTok",
-        "Printer"
-      ],
-      answer: 0,
-      explain: "Linux is an operating system."
-    },
-    {
-      id: 6,
-      q: "Pick the hardware item:",
-      choices: [
-        "CPU",
-        "Google Chrome",
-        "iOS",
-        "Files app"
-      ],
-      answer: 0,
-      explain: "CPU is physical hardware."
-    },
-    {
-      id: 7,
-      q: "Which is an embedded system?",
-      choices: [
-        "Microwave control unit",
-        "Desktop tower",
-        "External hard drive",
-        "Cloud server"
-      ],
-      answer: 0,
-      explain: "A microwave has a computer built in to run it."
-    },
-    {
-      id: 8,
-      q: "Smartphone camera is an example of abstraction because...",
-      choices: [
-        "You must manually focus every lens element",
-        "You tap a button while details like focus, processing, and saving are hidden",
-        "It only works in airplane mode",
-        "It hides the battery"
-      ],
-      answer: 1,
-      explain: "The camera UI hides complex steps behind a simple action."
-    },
-    {
-      id: 9,
-      q: "In printing a document, what does the OS use to talk to the printer?",
-      choices: [
-        "Printer drivers",
-        "Screen brightness",
-        "A random number",
-        "Power button"
-      ],
-      answer: 0,
-      explain: "Drivers translate between OS and device hardware."
-    },
-    {
-      id: 10,
-      q: "ATM example: which is a hidden detail?",
-      choices: [
-        "Insert card and enter PIN",
-        "Encryption of the PIN and secure server communication",
-        "You selecting withdrawal on screen",
-        "Touching the buttons"
-      ],
-      answer: 1,
-      explain: "Security and backend communication are hidden from the user."
-    },
-    {
-      id: 11,
-      q: "Why is abstraction important in computing?",
-      choices: [
-        "It makes tech user friendly and lets devs focus on higher level tasks",
-        "It slows down programs",
-        "It removes security",
-        "It removes the OS"
-      ],
-      answer: 0,
-      explain: "Abstraction reduces complexity so users and developers can work efficiently."
-    },
-    {
-      id: 12,
-      q: "Playing Spotify: where is the OS involved?",
-      choices: [
-        "Translating the app command into instructions for the audio driver and sound card",
-        "Picking your favorite songs for you",
-        "Designing album art",
-        "Buying concert tickets"
-      ],
-      answer: 0,
-      explain: "The OS routes audio through drivers to hardware."
-    }
+    {id:1,q:"What is the main job of the Operating System?",choices:["Manage hardware, run system processes, and allow apps to work with hardware","Display websites and play videos","Print documents without any drivers","Make the computer look pretty"],answer:0,explain:"The OS bridges apps and hardware and manages resources."},
+    {id:2,q:"Why cannot applications run without system software?",choices:["Apps dislike talking to hardware","They need the OS to translate user commands into hardware instructions","Hardware only accepts voice commands","Browsers are allergic to RAM"],answer:1,explain:"The OS translates high level requests to low level actions."},
+    {id:3,q:"Which best defines abstraction?",choices:["Showing all hardware details","Hiding complex details and showing what is needed","Deleting features from an app","Turning off background processes"],answer:1,explain:"Abstraction hides complexity so users can focus on tasks."},
+    {id:4,q:"Which is application software?",choices:["Microsoft Word","CPU","RAM","Power supply"],answer:0,explain:"Word is an app for users."},
+    {id:5,q:"Which is system software?",choices:["Linux","Keyboard","TikTok","Printer"],answer:0,explain:"Linux is an operating system."},
+    {id:6,q:"Pick the hardware item:",choices:["CPU","Google Chrome","iOS","Files app"],answer:0,explain:"CPU is physical hardware."},
+    {id:7,q:"Which is an embedded system?",choices:["Microwave control unit","Desktop tower","External hard drive","Cloud server"],answer:0,explain:"A microwave has a computer built in."},
+    {id:8,q:"Smartphone camera shows abstraction because...",choices:["You must focus every lens element","You tap a button while focus, processing, and saving are hidden","It only works in airplane mode","It hides the battery"],answer:1,explain:"The UI hides complex steps behind a simple action."},
+    {id:9,q:"In printing a document, what does the OS use to talk to the printer?",choices:["Printer drivers","Screen brightness","A random number","Power button"],answer:0,explain:"Drivers translate between OS and device hardware."},
+    {id:10,q:"ATM example - which is a hidden detail?",choices:["Insert card and enter PIN","Encryption of the PIN and secure server communication","Selecting withdrawal on screen","Touching the buttons"],answer:1,explain:"Security and backend communication are hidden."},
+    {id:11,q:"Why is abstraction important?",choices:["It makes tech easier and lets devs focus on higher level tasks","It slows down programs","It removes security","It removes the OS"],answer:0,explain:"Abstraction reduces complexity for users and developers."},
+    {id:12,q:"Playing Spotify - where is the OS involved?",choices:["Translating the app command to the audio driver and sound card","Picking your favorite songs","Designing album art","Buying concert tickets"],answer:0,explain:"The OS routes audio through drivers to hardware."}
   ];
 
-  // Game constants
-  const CANVAS_W = 1100;
-  const CANVAS_H = 660;
-  const GRAVITY = 0.9;
-  const MOVE_SPEED = 5.2;
-  const JUMP_VEL = -17.5;
-  const MAX_VEL_Y = 20;
+  // Levels
+  const LEVELS = [
+    { id:'quiz', name:'Quiz Run', tags:['Q Blocks','Abstraction'], desc:'Collect question blocks and answer all 12 to unlock the flag.', type:'quiz' },
+    { id:'relay', name:'Layers Relay', tags:['App','OS','Hardware'], desc:'Carry actions from App to OS to Hardware. Complete 5 actions to finish.', type:'relay' },
+    { id:'boss', name:'Final Boss: Coach Horace', tags:['Laser Eyes','Kid Friendly'], desc:'Dodge eye lasers and toss Knowledge Orbs. On hit, answer a question. Correct puts boss to sleep for 5 seconds.', type:'boss' }
+  ];
 
+  // Canvas and HUD
+  const CANVAS_W = 1100, CANVAS_H = 660;
+  const GRAVITY = 0.9, MOVE_SPEED = 5.2, JUMP_VEL = -17.5, MAX_VEL_Y = 20;
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
-
   const hudScore = document.getElementById('score');
   const hudLives = document.getElementById('lives');
   const hudProg  = document.getElementById('progress');
 
+  // UI refs
   const menu = document.getElementById('menu');
-  const startBtn = document.getElementById('startBtn');
+  const levelList = document.getElementById('levelList');
   const btnPause = document.getElementById('btnPause');
   const btnHelp = document.getElementById('btnHelp');
   const btnReset = document.getElementById('btnReset');
+  const btnBossImg = document.getElementById('btnBossImg');
+  const bossFile = document.getElementById('bossFile');
 
   const quiz = document.getElementById('quiz');
   const qTitle = document.getElementById('qTitle');
@@ -415,447 +161,204 @@
   const again = document.getElementById('again');
   const finalStats = document.getElementById('finalStats');
 
-  const keys = new Set();
-
-  // World data
-  let cameraX = 0;
-  let worldW = 3800;
-
-  // Player
-  const player = { x: 80, y: 0, w: 36, h: 46, vx: 0, vy: 0, onGround: false, facing: 1 };
-
-  // Platforms
-  let platforms = [];
-  // Question blocks
-  let qblocks = [];
-  // Goal flag
-  let goal = { x: worldW - 140, y: CANVAS_H - 260, w: 20, h: 200 };
-
-  // Stats
-  let score = 0;
-  let lives = 3;
-  let answered = 0;
-  let usedIds = new Set();
-
   // State
-  let state = 'menu'; // menu, playing, paused, question, gameover, win
+  const keys = new Set();
+  let cameraX = 0, worldW = 3800;
+  const player = { x:80, y:0, w:36, h:46, vx:0, vy:0, onGround:false, facing:1, carrying:null };
+  let platforms = [], qblocks = [], goal = { x:3600, y: CANVAS_H - 260, w:20, h:200 };
+  let score = 0, lives = 10, answered = 0, usedIds = new Set();
+  let state = 'menu';
   let currentQuestion = null;
+  let currentLevel = LEVELS[0];
+  let questionMode = 'standard'; // 'standard' or 'boss'
 
-  function resetWorld() {
-    cameraX = 0;
-    worldW = 3800;
-    Object.assign(player, { x: 80, y: 0, vx: 0, vy: 0, onGround: false, facing: 1 });
+  // Relay data
+  let relayStations = null;
 
-    // Build platforms
-    platforms = [];
-    const groundY = CANVAS_H - 60;
-    platforms.push({x: 0, y: groundY, w: worldW, h: 60});
+  // Boss data
+  const bossImg = new Image(); bossImg.src = './boss.webp'; // place boss.webp next to index.html
+  let boss = null; // {x,y,w,h,hp,maxHp,laserCd,laserTimer,defeated}
+  let orbs = []; // player projectiles
+  let lasers = []; // boss lasers
+  let particles = []; // fx
+  let fireCd = 0; // orb cooldown
+  let bossSleepTimer = 0; // frames
 
-    // Floating platforms sections
-    const floats = [
-      {x: 300, y: groundY - 140, w: 200, h: 20},
-      {x: 560, y: groundY - 220, w: 180, h: 20},
-      {x: 820, y: groundY - 140, w: 200, h: 20},
-      {x: 1180, y: groundY - 190, w: 220, h: 20},
-      {x: 1520, y: groundY - 260, w: 160, h: 20},
-      {x: 1770, y: groundY - 180, w: 200, h: 20},
-      {x: 2050, y: groundY - 120, w: 160, h: 20},
-      {x: 2360, y: groundY - 210, w: 220, h: 20},
-      {x: 2700, y: groundY - 150, w: 180, h: 20},
-      {x: 3000, y: groundY - 220, w: 220, h: 20},
-      {x: 3300, y: groundY - 160, w: 180, h: 20},
-    ];
-    platforms.push(...floats);
-
-    // Question blocks placed along the level
-    qblocks = [];
-    const qXs = [360, 610, 880, 1220, 1540, 1790, 2080, 2390, 2730, 3050, 3320, 3500];
-    const groundBlockYs = [groundY - 80, groundY - 160, groundY - 80, groundY - 120, groundY - 180, groundY - 110, groundY - 60, groundY - 150, groundY - 90, groundY - 160, groundY - 100, groundY - 140];
-    for (let i = 0; i < qXs.length; i++) {
-      qblocks.push({ x: qXs[i], y: groundBlockYs[i], w: 34, h: 34, used: false });
-    }
-  }
-
-  function drawBackground() {
-    // Hills and clouds
-    const base = CANVAS_H - 60;
-    ctx.save();
-    ctx.translate(-cameraX*0.4, 0); // parallax
-
-    // Clouds
-    for (let i=0;i<6;i++) {
-      const cx = i*700 + 120;
-      const cy = 100 + (i%2)*40;
-      drawCloud(cx, cy);
-    }
-
-    // Hills
-    for (let i=0;i<7;i++) {
-      const hx = i*600 + 120;
-      drawHill(hx, base, 240);
-    }
-
-    ctx.restore();
-  }
-
-  function drawHill(x, baseY, r) {
-    ctx.fillStyle = '#94d976';
-    ctx.beginPath();
-    ctx.arc(x - cameraX*0.2, baseY, r, Math.PI, 2*Math.PI);
-    ctx.fill();
-  }
-  function drawCloud(x,y) {
-    ctx.fillStyle = '#ffffffcc';
-    const parts = [
-      {dx:0, dy:0, r:28}, {dx:24, dy:-12, r:24}, {dx:48, dy:0, r:28}, {dx:20, dy:10, r:20}
-    ];
-    parts.forEach(p=>{ ctx.beginPath(); ctx.arc(x+p.dx - cameraX*0.2, y+p.dy, p.r, 0, Math.PI*2); ctx.fill(); });
-  }
-
-  function drawGround() {
-    ctx.save();
-    ctx.translate(-cameraX, 0);
-    // Grass top
-    ctx.fillStyle = getGradient(0, CANVAS_H-60, 0, CANVAS_H-40, '#49a145', '#6ddf59');
-    ctx.fillRect(0, CANVAS_H-60, worldW, 10);
-
-    // Dirt body
-    ctx.fillStyle = getGradient(0, CANVAS_H-50, 0, CANVAS_H, '#6b4a33', '#4a3324');
-    ctx.fillRect(0, CANVAS_H-50, worldW, 50);
-
-    // Brick pattern top border
-    ctx.fillStyle = '#2d2016';
-    for (let x=0; x<worldW; x+=20) ctx.fillRect(x, CANVAS_H-50, 18, 2);
-
-    // Platforms
-    platforms.forEach(p=>{
-      ctx.fillStyle = '#8b5a3c';
-      ctx.fillRect(p.x, p.y, p.w, p.h);
-      // simple brick caps
-      ctx.fillStyle = '#6a3f28';
-      ctx.fillRect(p.x, p.y, p.w, 6);
-    });
-
-    // Question blocks
-    qblocks.forEach(b=>{
-      if (b.used) return;
-      drawQBlock(b.x, b.y, b.w, b.h);
-    });
-
-    // Goal flag
-    drawFlag(goal.x, goal.y, goal.w, goal.h);
-
-    ctx.restore();
-  }
-
-  function getGradient(x0, y0, x1, y1, c0, c1) {
-    const g = ctx.createLinearGradient(x0, y0, x1, y1);
-    g.addColorStop(0, c0); g.addColorStop(1, c1);
-    return g;
-  }
-
-  function drawQBlock(x,y,w,h){
-    ctx.fillStyle = '#7c3aed'; // purple block
-    ctx.fillRect(x, y, w, h);
-    ctx.strokeStyle = '#ffffffaa';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x+2, y+2, w-4, h-4);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '20px system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('?', x + w/2, y + h/2 + 1);
-  }
-
-  function drawFlag(x,y,w,h){
-    ctx.fillStyle = '#c5c5c5';
-    ctx.fillRect(x, y - 10, 6, h + 10);
-    ctx.beginPath();
-    ctx.moveTo(x+6, y+20);
-    ctx.lineTo(x+6+80, y+40);
-    ctx.lineTo(x+6, y+60);
-    ctx.closePath();
-    ctx.fillStyle = '#22c55e';
-    ctx.fill();
-  }
-
-  function drawPlayer() {
-    ctx.save();
-    ctx.translate(-cameraX, 0);
-    // shadow
-    ctx.fillStyle = '#00000025';
-    ctx.beginPath();
-    ctx.ellipse(player.x + player.w/2, player.y + player.h + 6, player.w*0.5, 6, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    // body
-    ctx.fillStyle = '#2563eb';
-    ctx.fillRect(player.x, player.y, player.w, player.h);
-    // hat
-    ctx.fillStyle = '#fbbf24';
-    ctx.fillRect(player.x-4, player.y-8, player.w+8, 10);
-    // face simple
-    ctx.fillStyle = '#ffffffcc';
-    const eyeX = player.facing >= 0 ? player.x+24 : player.x+12;
-    ctx.fillRect(eyeX, player.y+14, 6, 6);
-
-    // little arm
-    ctx.fillStyle = '#1d4ed8';
-    ctx.fillRect(player.x + (player.facing>=0?player.w-6:-2), player.y+20, 4, 10);
-    ctx.restore();
-  }
-
-  function aabb(a,b){
-    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-  }
-
-  function update(dt) {
-    if (state !== 'playing') return;
-
-    // Input
-    const left = keys.has('ArrowLeft') || keys.has('a');
-    const right = keys.has('ArrowRight') || keys.has('d');
-    const jump = keys.has(' ') || keys.has('w') || keys.has('ArrowUp');
-
-    player.vx = 0;
-    if (left) { player.vx = -MOVE_SPEED; player.facing = -1; }
-    if (right) { player.vx = MOVE_SPEED; player.facing = 1; }
-
-    if (jump && player.onGround) {
-      player.vy = JUMP_VEL;
-      player.onGround = false;
-    }
-
-    // Physics
-    player.vy += GRAVITY;
-    if (player.vy > MAX_VEL_Y) player.vy = MAX_VEL_Y;
-
-    // Horizontal move
-    player.x += player.vx;
-
-    // Collide X
-    platforms.forEach(p=>{
-      if (aabb(player, p)) {
-        if (player.vx > 0) player.x = p.x - player.w;
-        else if (player.vx < 0) player.x = p.x + p.w;
-      }
-    });
-
-    // Vertical move
-    player.y += player.vy;
-    player.onGround = false;
-
-    // Collide Y
-    platforms.forEach(p=>{
-      if (aabb(player, p)) {
-        if (player.vy > 0) { // falling
-          player.y = p.y - player.h;
-          player.vy = 0;
-          player.onGround = true;
-        } else if (player.vy < 0) { // jumping up
-          player.y = p.y + p.h;
-          player.vy = 0;
-        }
-      }
-    });
-
-    // Bounds
-    if (player.x < 0) player.x = 0;
-    if (player.x + player.w > worldW) player.x = worldW - player.w;
-
-    // Fell
-    if (player.y > CANVAS_H + 200) loseLife();
-
-    // Question blocks collision
-    for (const b of qblocks) {
-      if (!b.used && aabb(player, b)) {
-        triggerQuestion(b);
-        break;
-      }
-    }
-
-    // Goal check
-    if (answered >= 12 && aabb(player, goal)) {
-      winGame();
-    }
-
-    // Camera follows
-    const target = player.x + player.w/2 - CANVAS_W/2;
-    cameraX += (Math.max(0, Math.min(worldW - CANVAS_W, target)) - cameraX) * 0.08;
-  }
-
-  function loseLife() {
-    lives--;
-    updateHud();
-    if (lives <= 0) {
-      gameOver();
-      return;
-    }
-    // respawn
-    Object.assign(player, { x: 80, y: 0, vx: 0, vy: 0, onGround: false });
-    cameraX = Math.max(0, player.x - CANVAS_W/2);
-  }
-
-  function triggerQuestion(block){
-    currentQuestion = nextQuestion();
-    if (!currentQuestion) return; // should not happen
-    block.used = true;
-    openQuiz(currentQuestion);
-    state = 'question';
-  }
-
-  function nextQuestion(){
-    const remaining = QUESTION_BANK.filter(q=>!usedIds.has(q.id));
-    if (remaining.length === 0) return null;
-    const q = remaining[Math.floor(Math.random()*remaining.length)];
-    usedIds.add(q.id);
-    return q;
-  }
-
-  function openQuiz(q){
-    qTitle.textContent = `Question ${usedIds.size}`;
-    qText.textContent = q.q;
-    qExplain.textContent = '';
-    qStatus.textContent = 'Pick the best answer';
-    qContinue.disabled = true;
-
-    qChoices.innerHTML = '';
-    q.choices.forEach((c, idx)=>{
+  // Build level select tiles
+  function buildLevelList(){
+    levelList.innerHTML = '';
+    LEVELS.forEach(l=>{
       const div = document.createElement('div');
-      div.className = 'choice';
-      div.textContent = `${idx+1}. ${c}`;
-      div.addEventListener('click', ()=> answerQuiz(q, idx, div));
-      qChoices.appendChild(div);
+      div.className = 'level-tile';
+      div.innerHTML = `<h3 style="margin:0 0 6px">${l.name}</h3><div>${l.desc}</div><div style=\"margin-top:8px\">${l.tags.map(t=>`<span class=tag>${t}</span>`).join('')}</div>`;
+      div.addEventListener('click', ()=> startLevel(l));
+      levelList.appendChild(div);
     });
-
-    quiz.classList.add('show');
   }
 
-  function answerQuiz(q, idx, el){
-    // prevent double answer
-    if (qContinue.disabled === false) return;
-
-    [...qChoices.children].forEach((child, i)=>{
-      if (i === q.answer) child.classList.add('correct');
-      if (i === idx && idx !== q.answer) child.classList.add('wrong');
-    });
-
-    const correct = idx === q.answer;
-    if (correct) {
-      score += 100;
-      answered += 1;
-      qStatus.textContent = 'Correct';
-    } else {
-      score = Math.max(0, score - 30);
-      lives -= 1;
-      qStatus.textContent = 'Incorrect';
-      if (lives <= 0) { updateHud(); gameOver(true); return; }
-    }
-    qExplain.textContent = q.explain;
-    updateHud();
-    qContinue.disabled = false;
-  }
-
-  function closeQuiz(){ quiz.classList.remove('show'); }
-
-  function gameOver(fromQuiz=false){
-    state = 'gameover';
-    endTitle.textContent = 'Game Over';
-    endMsg.textContent = fromQuiz ? 'Keep practicing the study guide and try again.' : 'Careful with those jumps. Review and retry.';
-    finalStats.textContent = `Score ${score} • Q ${answered}/12`;
-    end.classList.add('show');
-  }
-
-  function winGame(){
-    state = 'win';
-    endTitle.textContent = 'Victory';
-    endMsg.textContent = 'You reached the flag and cleared the review.';
-    finalStats.textContent = `Score ${score} • Q ${answered}/12`;
-    end.classList.add('show');
-  }
-
-  function updateHud(){
-    hudScore.textContent = `Score: ${score}`;
-    const hearts = lives <= 0 ? '' : '❤️'.repeat(lives);
-    hudLives.textContent = `Lives: ${hearts}`;
-    hudProg.textContent = `Q: ${answered}/12`;
-  }
-
-  function render(){
-    ctx.clearRect(0,0,canvas.width, canvas.height);
-    drawBackground();
-    drawGround();
-    drawPlayer();
-
-    // Foreground hint when near flag
-    if (answered < 12) {
-      ctx.save();
-      ctx.translate(-cameraX,0);
-      ctx.fillStyle = '#00000055';
-      ctx.font = '16px system-ui, sans-serif';
-      ctx.fillText('Answer all 12 questions to unlock the flag', goal.x - 120, goal.y - 12);
-      ctx.restore();
-    }
-  }
-
-  let last = 0;
-  function loop(ts){
-    const dt = (ts - last) / 16.67; // normalize to ~60fps units
-    last = ts;
-    update(dt);
-    render();
-    requestAnimationFrame(loop);
-  }
-
-  // Input
-  window.addEventListener('keydown', (e)=>{
-    const k = e.key;
-    if (['ArrowLeft','ArrowRight','ArrowUp',' ','a','d','w'].includes(k)) e.preventDefault();
-    keys.add(k);
-
-    if (state === 'playing') {
-      if (k.toLowerCase() === 'p') togglePause();
-      if (k.toLowerCase() === 'h') toggleHelp();
-      if (k.toLowerCase() === 'r') resetGame();
-    }
-
-    if (state === 'question') {
-      if (['1','2','3','4'].includes(k) && currentQuestion) {
-        const idx = parseInt(k, 10) - 1;
-        const node = qChoices.children[idx];
-        if (node) answerQuiz(currentQuestion, idx, node);
-      }
-    }
-  });
-  window.addEventListener('keyup', (e)=> keys.delete(e.key));
-
-  function togglePause(){
-    if (state === 'playing') { state = 'paused'; menu.classList.add('show'); startBtn.textContent = 'Resume'; }
-    else if (state === 'paused') { state = 'playing'; menu.classList.remove('show'); startBtn.textContent = 'Start'; }
-  }
-  function toggleHelp(){
-    if (help.classList.contains('show')) help.classList.remove('show');
-    else help.classList.add('show');
+  function startLevel(level){
+    currentLevel = level;
+    menu.classList.remove('show');
+    resetGame();
   }
 
   function resetGame(){
-    score = 0; lives = 3; answered = 0; usedIds = new Set();
-    resetWorld(); updateHud(); state = 'playing';
+    score = 0; lives = 10; answered = 0; usedIds = new Set(); questionMode = 'standard';
+    if (currentLevel.type === 'quiz') resetWorldQuiz();
+    else if (currentLevel.type === 'relay') resetWorldRelay();
+    else resetWorldBoss();
+    updateHud();
+    state = 'playing';
   }
 
+  // World builders
+  function resetWorldQuiz(){
+    cameraX = 0; worldW = 3800; Object.assign(player,{ x:80,y:0,vx:0,vy:0,onGround:false,facing:1,carrying:null });
+    platforms = []; qblocks = [];
+    const groundY = CANVAS_H - 60; platforms.push({x:0,y:groundY,w:worldW,h:60});
+    const floats = [
+      {x:300,y:groundY-140,w:200,h:20},{x:560,y:groundY-220,w:180,h:20},{x:820,y:groundY-140,w:200,h:20},
+      {x:1180,y:groundY-190,w:220,h:20},{x:1520,y:groundY-260,w:160,h:20},{x:1770,y:groundY-180,w:200,h:20},
+      {x:2050,y:groundY-120,w:160,h:20},{x:2360,y:groundY-210,w:220,h:20},{x:2700,y:groundY-150,w:180,h:20},
+      {x:3000,y:groundY-220,w:220,h:20},{x:3300,y:groundY-160,w:180,h:20}
+    ]; platforms.push(...floats);
+    const qXs=[360,610,880,1220,1540,1790,2080,2390,2730,3050,3320,3500];
+    const qYs=[groundY-80,groundY-160,groundY-80,groundY-120,groundY-180,groundY-110,groundY-60,groundY-150,groundY-90,groundY-160,groundY-100,groundY-140];
+    for(let i=0;i<qXs.length;i++) qblocks.push({x:qXs[i],y:qYs[i],w:34,h:34,used:false});
+    goal = { x: worldW - 140, y: CANVAS_H - 260, w: 20, h: 200 };
+    hudProg.textContent = `Q: ${answered}/12`;
+  }
+
+  function resetWorldRelay(){
+    cameraX = 0; worldW = 2600; Object.assign(player,{ x:80,y:0,vx:0,vy:0,onGround:false,facing:1,carrying:null });
+    platforms = []; qblocks = []; relayStations = null;
+    const groundY = CANVAS_H - 60; platforms.push({x:0,y:groundY,w:worldW,h:60});
+    const floats=[{x:500,y:groundY-120,w:120,h:18},{x:980,y:groundY-150,w:140,h:18},{x:1400,y:groundY-120,w:140,h:18},{x:1750,y:groundY-180,w:160,h:18}]; platforms.push(...floats);
+    relayStations = { appZone:{x:120,y:groundY-200,w:380,h:160,color:'#3b82f6',label:'APP'}, osZone:{x:600,y:groundY-200,w:380,h:160,color:'#10b981',label:'OS'}, hwZone:{x:1080,y:groundY-200,w:380,h:160,color:'#f59e0b',label:'HARDWARE'}, pickups:[], progress:0 };
+    const ACTIONS=[
+      { key:'PRINT', label:'Print Doc', appItem:'Print Icon', osItem:'Printer Driver Cmd', hwItem:'Printer' },
+      { key:'PLAY', label:'Play Music', appItem:'Play Button', osItem:'Audio Driver Cmd', hwItem:'Speakers' },
+      { key:'SAVE', label:'Save File', appItem:'Save Icon', osItem:'File System Call', hwItem:'SSD' },
+      { key:'PHOTO', label:'Take Photo', appItem:'Shutter', osItem:'Camera Pipeline', hwItem:'Image Sensor' },
+      { key:'SEARCH', label:'Web Search', appItem:'Search Bar', osItem:'Network Stack', hwItem:'WiFi Radio' }
+    ];
+    relayStations.pickups = ACTIONS.map((a,i)=>({ action:a, phase:'app', appRect:{x:relayStations.appZone.x+20+i*70,y:relayStations.appZone.y+40,w:60,h:30}, osRect:{x:relayStations.osZone.x+30+i*70,y:relayStations.osZone.y+40,w:60,h:30}, hwRect:{x:relayStations.hwZone.x+30+i*70,y:relayStations.hwZone.y+40,w:60,h:30}, done:false }));
+    goal = { x: worldW - 120, y: CANVAS_H - 260, w: 20, h: 200 };
+    hudProg.textContent = `Actions: 0/5`;
+  }
+
+  function resetWorldBoss(){
+    cameraX = 0; worldW = 2200; Object.assign(player,{ x:80,y:0,vx:0,vy:0,onGround:false,facing:1,carrying:null });
+    platforms = []; qblocks = []; relayStations = null; orbs = []; lasers = []; particles = []; fireCd = 0; bossSleepTimer = 0;
+    const groundY = CANVAS_H - 60; platforms.push({x:0,y:groundY,w:worldW,h:60});
+    platforms.push({x:600,y:groundY-120,w:160,h:18}); platforms.push({x:980,y:groundY-180,w:160,h:18}); platforms.push({x:1350,y:groundY-140,w:200,h:18});
+    platforms.push({x:1750,y:groundY-220,w:260,h:20});
+    boss = { x:1780, y:groundY-220-160, w:200, h:160, hp:12, maxHp:12, laserCd:180, laserTimer:90, defeated:false };
+    goal = { x: worldW - 40, y: CANVAS_H - 260, w: 20, h: 200 };
+    hudProg.textContent = `Boss HP: ${boss.hp}/${boss.maxHp}`;
+  }
+
+  // Drawing helpers
+  function drawBackground(){ const base = CANVAS_H - 60; ctx.save(); ctx.translate(-cameraX*0.4,0); for(let i=0;i<6;i++) drawCloud(i*700+120, 100+(i%2)*40); for(let i=0;i<7;i++) drawHill(i*600+120, base, 240); ctx.restore(); }
+  function drawHill(x,baseY,r){ ctx.fillStyle='#94d976'; ctx.beginPath(); ctx.arc(x - cameraX*0.2, baseY, r, Math.PI, 2*Math.PI); ctx.fill(); }
+  function drawCloud(x,y){ ctx.fillStyle='#fffC'; const ps=[{dx:0,dy:0,r:28},{dx:24,dy:-12,r:24},{dx:48,dy:0,r:28},{dx:20,dy:10,r:20}]; ps.forEach(p=>{ ctx.beginPath(); ctx.arc(x+p.dx-cameraX*0.2,y+p.dy,p.r,0,Math.PI*2); ctx.fill(); }); }
+  function getGradient(x0,y0,x1,y1,c0,c1){ const g=ctx.createLinearGradient(x0,y0,x1,y1); g.addColorStop(0,c0); g.addColorStop(1,c1); return g; }
+  function drawQBlock(x,y,w,h){ ctx.fillStyle='#7c3aed'; ctx.fillRect(x,y,w,h); ctx.strokeStyle='#ffffffaa'; ctx.lineWidth=2; ctx.strokeRect(x+2,y+2,w-4,h-4); ctx.fillStyle='#ffffff'; ctx.font='20px system-ui,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('?', x+w/2, y+h/2+1); }
+  function drawFlag(x,y,w,h){ ctx.fillStyle='#c5c5c5'; ctx.fillRect(x,y-10,6,h+10); ctx.beginPath(); ctx.moveTo(x+6,y+20); ctx.lineTo(x+86,y+40); ctx.lineTo(x+6,y+60); ctx.closePath(); ctx.fillStyle='#22c55e'; ctx.fill(); }
+  function aabb(a,b){ return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y; }
+  function rectContainsPoint(r,x,y){ return x>=r.x && x<=r.x+r.w && y>=r.y && y<=r.y+r.h; }
+  function lineIntersect(x1,y1,x2,y2,x3,y3,x4,y4){ const den=(x1-x2)*(y3-y4)-(y1-y2)*(x3-x4); if(den===0) return false; const t=((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/den; const u=-((x1-x2)*(y1-y3)-(y1-y2)*(x1-x3))/den; return t>=0&&t<=1&&u>=0&&u<=1; }
+  function lineIntersectsRect(x1,y1,x2,y2,r){ return lineIntersect(x1,y1,x2,y2, r.x,r.y,r.x+r.w,r.y) || lineIntersect(x1,y1,x2,y2, r.x,r.y,r.x,r.y+r.h) || lineIntersect(x1,y1,x2,y2, r.x+r.w,r.y,r.x+r.w,r.y+r.h) || lineIntersect(x1,y1,x2,y2, r.x,r.y+r.h,r.x+r.w,r.y+r.h) || rectContainsPoint(r,x1,y1) || rectContainsPoint(r,x2,y2); }
+
+  function drawZone(z){ ctx.fillStyle = z.color + '33'; ctx.fillRect(z.x,z.y,z.w,z.h); ctx.strokeStyle=z.color; ctx.lineWidth=3; ctx.strokeRect(z.x,z.y,z.w,z.h); ctx.fillStyle='#fff'; ctx.font='16px system-ui,sans-serif'; ctx.fillText(z.label, z.x+8, z.y+20); }
+  function drawItem(r,label,base){ ctx.fillStyle=base; ctx.fillRect(r.x,r.y,r.w,r.h); ctx.strokeStyle='#ffffffcc'; ctx.strokeRect(r.x+2,r.y+2,r.w-4,r.h-4); ctx.fillStyle='#fff'; ctx.font='11px system-ui,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(label, r.x+r.w/2, r.y+r.h/2); }
+
+  function drawPlayer(){ ctx.save(); ctx.translate(-cameraX,0); ctx.fillStyle='#0005'; ctx.beginPath(); ctx.ellipse(player.x+player.w/2, player.y+player.h+6, player.w*0.5, 6, 0, 0, Math.PI*2); ctx.fill(); ctx.fillStyle='#2563eb'; ctx.fillRect(player.x,player.y,player.w,player.h); ctx.fillStyle='#fbbf24'; ctx.fillRect(player.x-4,player.y-8,player.w+8,10); ctx.fillStyle='#ffffffcc'; const eyeX = player.facing>=0?player.x+24:player.x+12; ctx.fillRect(eyeX,player.y+14,6,6); ctx.fillStyle='#1d4ed8'; ctx.fillRect(player.x + (player.facing>=0?player.w-6:-2), player.y+20, 4, 10); ctx.restore(); }
+
+  // Boss draw
+  function drawBoss(){ if(!boss) return; ctx.save(); ctx.translate(-cameraX,0);
+    if (bossImg && bossImg.complete && bossImg.naturalWidth>0) ctx.drawImage(bossImg, boss.x,boss.y,boss.w,boss.h);
+    else { ctx.fillStyle='#7e22ce'; ctx.fillRect(boss.x,boss.y,boss.w,boss.h); ctx.fillStyle='#a78bfa'; ctx.fillRect(boss.x,boss.y,boss.w,22); }
+    const leftEye={x:boss.x+boss.w*0.35,y:boss.y+boss.h*0.32}; const rightEye={x:boss.x+boss.w*0.65,y:boss.y+boss.h*0.32};
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(leftEye.x,leftEye.y,6,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(rightEye.x,rightEye.y,6,0,Math.PI*2); ctx.fill();
+    const pct = Math.max(0, boss.hp/boss.maxHp); ctx.fillStyle='#0009'; ctx.fillRect(boss.x, boss.y-16, boss.w, 8); ctx.fillStyle='#22c55e'; ctx.fillRect(boss.x, boss.y-16, boss.w*pct, 8);
+    if (bossSleepTimer>0){ const secs = Math.ceil(bossSleepTimer/60); ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(boss.x+boss.w/2-22,boss.y-40,44,18); ctx.strokeStyle='#ffffffaa'; ctx.strokeRect(boss.x+boss.w/2-22,boss.y-40,44,18); ctx.fillStyle='#fff'; ctx.font='12px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(secs.toString(), boss.x+boss.w/2, boss.y-31); }
+    ctx.restore(); }
+  function drawLasers(){ ctx.save(); ctx.translate(-cameraX,0); lasers.forEach(L=>{ const g=ctx.createLinearGradient(L.x1,L.y1,L.x2,L.y2); g.addColorStop(0,'#fff'); g.addColorStop(1,'#ef4444'); ctx.strokeStyle=g; ctx.lineWidth = 4 + 2*Math.sin((L.life/20)*Math.PI); ctx.beginPath(); ctx.moveTo(L.x1,L.y1); ctx.lineTo(L.x2,L.y2); ctx.stroke(); }); ctx.restore(); }
+  function drawOrbs(){ ctx.save(); ctx.translate(-cameraX,0); orbs.forEach(o=> drawStar(o.x,o.y,5,8,4)); ctx.restore(); }
+  function drawParticles(){ ctx.save(); ctx.translate(-cameraX,0); particles.forEach(p=>{ ctx.fillStyle = `rgba(255,200,80,${Math.max(0,p.life/60)})`; ctx.fillRect(p.x,p.y,3,3); }); ctx.restore(); }
+  function drawStar(x,y,points,outer,inner){ ctx.fillStyle='#fde047'; ctx.beginPath(); for(let i=0;i<points*2;i++){ const r=i%2===0?outer:inner; const a=i*Math.PI/points; ctx.lineTo(x+Math.cos(a)*r, y+Math.sin(a)*r); } ctx.closePath(); ctx.fill(); ctx.strokeStyle='#f59e0b'; ctx.lineWidth=1; ctx.stroke(); }
+
+  // Update loop
+  function update(){ if(state!=='playing') return; const left=keys.has('ArrowLeft')||keys.has('a'); const right=keys.has('ArrowRight')||keys.has('d'); const jump=keys.has(' ')||keys.has('w')||keys.has('ArrowUp'); player.vx=0; if(left){player.vx=-MOVE_SPEED; player.facing=-1;} if(right){player.vx= MOVE_SPEED; player.facing=1;} if(jump && player.onGround){ player.vy=JUMP_VEL; player.onGround=false; }
+    player.vy+=GRAVITY; if(player.vy>MAX_VEL_Y) player.vy=MAX_VEL_Y; player.x+=player.vx; platforms.forEach(p=>{ if(aabb(player,p)){ if(player.vx>0) player.x=p.x-player.w; else if(player.vx<0) player.x=p.x+p.w; }}); player.y+=player.vy; player.onGround=false; platforms.forEach(p=>{ if(aabb(player,p)){ if(player.vy>0){ player.y=p.y-player.h; player.vy=0; player.onGround=true; } else if(player.vy<0){ player.y=p.y+p.h; player.vy=0; } }}); if(player.x<0) player.x=0; if(player.x+player.w>worldW) player.x=worldW-player.w; if(player.y>CANVAS_H+200) loseLife();
+    if(currentLevel.type==='quiz'){ for(const b of qblocks){ if(!b.used && aabb(player,b)){ triggerQuestion(b); break; } } if(answered>=12 && aabb(player,goal)) winGame(); }
+    else if(currentLevel.type==='relay'){ updateRelay(); if(relayStations.progress>=5 && aabb(player,goal)) winGame(); }
+    else if(currentLevel.type==='boss'){ updateBoss(); }
+    const target = player.x + player.w/2 - CANVAS_W/2; cameraX += (Math.max(0,Math.min(worldW-CANVAS_W,target)) - cameraX) * 0.08; }
+
+  function updateRelay(){ const z=relayStations; if(!z) return; if(!player.carrying){ for(const p of z.pickups){ if(p.done||p.phase!=='app') continue; const r={x:p.appRect.x,y:p.appRect.y,w:p.appRect.w,h:p.appRect.h}; if(aabb(player,r)){ player.carrying={phase:'app',key:p.action.key,label:p.action.appItem}; break; } } } else { if(player.carrying.phase==='app'){ const dock={x:z.osZone.x,y:z.osZone.y,w:z.osZone.w,h:z.osZone.h}; if(aabb(player,dock)){ const p=z.pickups.find(pp=>!pp.done&&pp.phase==='app'&&pp.action.key===player.carrying.key); if(p){ p.phase='os'; player.carrying={phase:'os',key:p.action.key,label:p.action.osItem}; score+=50; updateHud(); } } } else if(player.carrying.phase==='os'){ const dock={x:z.hwZone.x,y:z.hwZone.y,w:z.hwZone.w,h:z.hwZone.h}; if(aabb(player,dock)){ const p=z.pickups.find(pp=>!pp.done&&pp.phase==='os'&&pp.action.key===player.carrying.key); if(p){ p.phase='hw'; player.carrying={phase:'hw',key:p.action.key,label:p.action.hwItem}; score+=50; updateHud(); } } } else if(player.carrying.phase==='hw'){ const p=z.pickups.find(pp=>!pp.done&&pp.phase==='hw'&&pp.action.key===player.carrying.key); if(p){ const r=p.hwRect; if(aabb(player,{x:r.x,y:r.y,w:r.w,h:r.h})){ p.done=true; z.progress+=1; player.carrying=null; score+=100; updateHud(); } } } }
+  }
+
+  function updateBoss(){ if(!boss) return; if(bossSleepTimer>0) bossSleepTimer--; else if(!boss.defeated){ boss.laserTimer--; if(boss.laserTimer<=0){ spawnLaserVolley(); boss.laserTimer=boss.laserCd; } }
+    lasers.forEach(L=>L.life--); lasers = lasers.filter(L=>L.life>0);
+    if(state==='playing'){ for(const L of lasers){ if(lineIntersectsRect(L.x1,L.y1,L.x2,L.y2, player)){ lasers = lasers.filter(x=>x!==L); takeLaserHit(); break; } } }
+    orbs.forEach(o=>{ o.x+=o.vx; o.y+=o.vy; o.vy+=0.2; o.life--; }); orbs = orbs.filter(o=> o.life>0 && o.x>=0 && o.x<=worldW && o.y<=CANVAS_H+100);
+    for(const o of orbs){ if(aabb({x:o.x-6,y:o.y-6,w:12,h:12}, boss) && !boss.defeated){ boss.hp=Math.max(0,boss.hp-1); score+=20; o.life=0; flashBoss(); if(boss.hp===0){ boss.defeated=true; spawnExplosion(boss.x+boss.w/2,boss.y+boss.h/2); setTimeout(()=>bossWin(),800); } updateHud(); } }
+    particles.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=0.1; p.life--; }); particles = particles.filter(p=>p.life>0);
+  }
+
+  function spawnLaserVolley(){ const leftEye={x:boss.x+boss.w*0.35,y:boss.y+boss.h*0.32}; const rightEye={x:boss.x+boss.w*0.65,y:boss.y+boss.h*0.32}; const target={ x: player.x+player.w/2 + rand(-120,120), y: player.y+player.h/2 + rand(-80,80) }; lasers.push({x1:leftEye.x,y1:leftEye.y,x2:target.x,y2:target.y,life:40}); lasers.push({x1:rightEye.x,y1:rightEye.y,x2:target.x,y2:target.y,life:40}); }
+  function takeLaserHit(){ if(state!=='playing'||currentLevel.type!=='boss') return; player.vy=-6; player.vx*= -0.4; questionMode='boss'; const q = QUESTION_BANK[Math.floor(Math.random()*QUESTION_BANK.length)]; currentQuestion=q; openQuiz(q); state='question'; }
+  function flashBoss(){ for(let i=0;i<8;i++) particles.push({x:rand(boss.x,boss.x+boss.w), y:rand(boss.y,boss.y+boss.h), vx:rand(-2,2), vy:rand(-3,-1), life:20}); }
+  function spawnExplosion(x,y){ for(let i=0;i<60;i++) particles.push({x,y,vx:rand(-4,4),vy:rand(-6,-1),life:rand(20,60)}); }
+  function bossWin(){ state='win'; endTitle.textContent='You Win Congraduction'; endMsg.textContent='Boss defeated by the power of knowledge.'; finalStats.textContent = `Score ${score}`; end.classList.add('show'); }
+
+  // Quiz flow
+  function nextQuestion(){ const remaining = QUESTION_BANK.filter(q=>!usedIds.has(q.id)); if(remaining.length===0) return null; const q = remaining[Math.floor(Math.random()*remaining.length)]; usedIds.add(q.id); return q; }
+  function triggerQuestion(block){ currentQuestion = nextQuestion(); if(!currentQuestion) return; block.used = true; questionMode='standard'; openQuiz(currentQuestion); state='question'; }
+  function openQuiz(q){ qTitle.textContent = questionMode==='boss' ? 'Boss Question' : `Question ${usedIds.size}`; qText.textContent=q.q; qExplain.textContent=''; qStatus.textContent='Pick the best answer'; qContinue.disabled=true; qChoices.innerHTML=''; q.choices.forEach((c,idx)=>{ const div=document.createElement('div'); div.className='choice'; div.textContent=`${idx+1}. ${c}`; div.addEventListener('click',()=>answerQuiz(q,idx,div)); qChoices.appendChild(div); }); quiz.classList.add('show'); }
+  function answerQuiz(q,idx){ if(qContinue.disabled===false) return; [...qChoices.children].forEach((node,i)=>{ if(i===q.answer) node.classList.add('correct'); if(i===idx && idx!==q.answer) node.classList.add('wrong'); }); const correct = idx===q.answer; if(questionMode==='boss'){ if(correct){ qStatus.textContent='Correct - boss is snoozing'; bossSleepTimer = 5*60; lasers = []; score += 25; } else { qStatus.textContent='Incorrect - lost 1 heart'; lives -= 1; if(lives<=0){ updateHud(); gameOver(true); return; } } } else { if(correct){ score+=100; answered+=1; qStatus.textContent='Correct'; } else { score=Math.max(0,score-30); lives-=1; qStatus.textContent='Incorrect'; if(lives<=0){ updateHud(); gameOver(true); return; } } }
+    qExplain.textContent=q.explain; updateHud(); qContinue.disabled=false; }
+  function closeQuiz(){ quiz.classList.remove('show'); questionMode='standard'; }
+
+  // HUD and end states
+  function updateHud(){ hudScore.textContent = `Score: ${score}`; hudLives.textContent = lives>6 ? `Lives: ❤️ x${lives}` : `Lives: ${'❤️'.repeat(Math.max(0,lives))}`; if(currentLevel.type==='quiz') hudProg.textContent=`Q: ${answered}/12`; else if(currentLevel.type==='relay' && relayStations) hudProg.textContent=`Actions: ${relayStations.progress}/5`; else if(currentLevel.type==='boss' && boss) hudProg.textContent=`Boss HP: ${boss.hp}/${boss.maxHp}`; }
+  function gameOver(fromQuiz=false){ state='gameover'; endTitle.textContent='Game Over'; endMsg.textContent = fromQuiz ? 'Review the guide and try again.' : 'Try again.'; finalStats.textContent = currentLevel.type==='quiz' ? `Score ${score} • Q ${answered}/12` : currentLevel.type==='relay' ? `Score ${score} • Actions ${relayStations?relayStations.progress:0}/5` : `Score ${score}`; end.classList.add('show'); }
+  function winGame(){ state='win'; endTitle.textContent='Victory'; endMsg.textContent = currentLevel.type==='quiz' ? 'You reached the flag and cleared the review.' : 'Actions delivered end to end.'; finalStats.textContent = currentLevel.type==='quiz' ? `Score ${score} • Q ${answered}/12` : `Score ${score} • Actions ${relayStations?relayStations.progress:0}/5`; end.classList.add('show'); }
+
+  // Render
+  function drawGround(){ ctx.save(); ctx.translate(-cameraX,0); ctx.fillStyle=getGradient(0,CANVAS_H-60,0,CANVAS_H-40,'#49a145','#6ddf59'); ctx.fillRect(0,CANVAS_H-60,worldW,10); ctx.fillStyle=getGradient(0,CANVAS_H-50,0,CANVAS_H,'#6b4a33','#4a3324'); ctx.fillRect(0,CANVAS_H-50,worldW,50); ctx.fillStyle='#2d2016'; for(let x=0;x<worldW;x+=20) ctx.fillRect(x,CANVAS_H-50,18,2); platforms.forEach(p=>{ ctx.fillStyle='#8b5a3c'; ctx.fillRect(p.x,p.y,p.w,p.h); ctx.fillStyle='#6a3f28'; ctx.fillRect(p.x,p.y,p.w,6); }); if(currentLevel.type==='quiz') qblocks.forEach(b=>{ if(!b.used) drawQBlock(b.x,b.y,b.w,b.h); }); if(currentLevel.type==='relay'){ drawZone(relayStations.appZone); drawZone(relayStations.osZone); drawZone(relayStations.hwZone); relayStations.pickups.forEach(p=>{ if(!p.done){ if(p.phase==='app') drawItem(p.appRect,p.action.appItem,'#3b82f6'); if(p.phase==='os') drawItem(p.osRect,p.action.osItem,'#10b981'); if(p.phase==='hw') drawItem(p.hwRect,p.action.hwItem,'#f59e0b'); } }); }
+    if(currentLevel.type!=='boss' || (currentLevel.type==='boss' && boss && boss.defeated)) drawFlag(goal.x,goal.y,goal.w,goal.h);
+    ctx.restore(); }
+
+  function render(){ ctx.clearRect(0,0,canvas.width,canvas.height); drawBackground(); drawGround(); if(currentLevel.type==='boss'){ drawBoss(); drawLasers(); drawOrbs(); drawParticles(); } drawPlayer(); if(currentLevel.type==='quiz' && answered<12){ ctx.save(); ctx.translate(-cameraX,0); ctx.fillStyle='#0008'; ctx.font='16px system-ui'; ctx.fillText('Answer all 12 questions to unlock the flag', goal.x-120, goal.y-12); ctx.restore(); } if(currentLevel.type==='relay' && relayStations && relayStations.progress<5){ ctx.save(); ctx.translate(-cameraX,0); ctx.fillStyle='#0008'; ctx.font='16px system-ui'; ctx.fillText('Complete 5 actions App to OS to Hardware then touch the flag', goal.x-320, goal.y-12); ctx.restore(); } }
+
+  // Loop
+  let last=0; function loop(ts){ const dt=(ts-last)/16.67; last=ts; update(dt); render(); requestAnimationFrame(loop); }
+
+  // Input
+  window.addEventListener('keydown', e=>{ const k=e.key; if(['ArrowLeft','ArrowRight','ArrowUp',' ','a','d','w','f'].includes(k)) e.preventDefault(); keys.add(k); if(state==='playing'){ if(k.toLowerCase()==='p') togglePause(); if(k.toLowerCase()==='h') toggleHelp(); if(k.toLowerCase()==='r') resetGame(); if(k.toLowerCase()==='f' && currentLevel.type==='boss') shootOrb(); } if(state==='question'){ if(['1','2','3','4'].includes(k) && currentQuestion){ const idx=parseInt(k,10)-1; const node=qChoices.children[idx]; if(node) answerQuiz(currentQuestion,idx); } } });
+  window.addEventListener('keyup', e=> keys.delete(e.key));
+
+  function shootOrb(){ if(fireCd>0) return; const dir=player.facing>=0?1:-1; orbs.push({x:player.x+player.w/2+dir*8,y:player.y+16,vx:8*dir,vy:-2,life:100}); fireCd=18; }
+  setInterval(()=>{ if(fireCd>0) fireCd--; }, 16);
+
+  function togglePause(){ if(state==='playing'){ state='paused'; menu.classList.add('show'); buildLevelList(); } else if(state==='paused'){ state='playing'; menu.classList.remove('show'); } }
+  function toggleHelp(){ if(help.classList.contains('show')) help.classList.remove('show'); else help.classList.add('show'); }
+
   // Buttons
-  startBtn.addEventListener('click', ()=>{ menu.classList.remove('show'); if (state!=='paused') resetGame(); state = 'playing'; });
   btnPause.addEventListener('click', togglePause);
   btnHelp.addEventListener('click', toggleHelp);
   helpClose.addEventListener('click', toggleHelp);
   btnReset.addEventListener('click', resetGame);
-  qContinue.addEventListener('click', ()=>{ closeQuiz(); state = 'playing'; });
-  again.addEventListener('click', ()=>{ end.classList.remove('show'); resetGame(); });
+  qContinue.addEventListener('click', ()=>{ closeQuiz(); state='playing'; });
+  again.addEventListener('click', ()=>{ end.classList.remove('show'); state='paused'; menu.classList.add('show'); buildLevelList(); });
+  btnBossImg.addEventListener('click', ()=> bossFile.click());
+  bossFile.addEventListener('change', (e)=>{ const file=e.target.files&&e.target.files[0]; if(!file) return; const url=URL.createObjectURL(file); bossImg.src=url; });
 
   // Init
-  resetWorld();
-  updateHud();
-  requestAnimationFrame(loop);
+  buildLevelList(); updateHud(); requestAnimationFrame(loop);
   </script>
 </body>
 </html>
